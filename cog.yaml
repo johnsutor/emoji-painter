@@ -1,0 +1,7 @@
+build:
+  python_version: "3.10"
+  python_packages:
+    - pillow==10.2.0
+    - torch==2.2.1
+    - torchvision==0.17.1
+predict: "cog.py:Predictor"

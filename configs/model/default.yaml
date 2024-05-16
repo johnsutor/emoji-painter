@@ -1,0 +1,5 @@
+param_per_stroke: 4
+hidden_dim: 256
+n_heads: 8
+n_enc_layers: 3
+n_dec_layers: 3

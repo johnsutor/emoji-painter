@@ -1,0 +1,23 @@
+device: 'cuda'
+hidden_dim: 256
+log_interval: 100
+log_with: 'tensorboard' # or 'wandb'
+mixed_precision: 'no'
+n_dec_layers: 3
+n_enc_layers: 3
+n_heads: 8
+num_blocks: 3
+num_shapes: 501
+num_strokes: 8
+param_per_stroke: 4
+param_shape: 4
+patch_size: 64
+recreation_path: "./images/recreation.jpg"
+scale: 8
+shapes_path: "./storage/shapes.pth"
+target_path: "./images/mona.jpg"
+weights_path: "./storage/weights.pth"
+
+hydra:
+  run:
+    dir: ./

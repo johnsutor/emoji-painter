@@ -1,0 +1,7 @@
+type: adamw
+kwargs:
+  weight_decay: 1e-6
+  betas:
+    - 0.9
+    - 0.999
+  eps: 1e-8

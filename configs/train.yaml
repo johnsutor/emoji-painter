@@ -1,0 +1,29 @@
+defaults:
+  - _self_
+  - model: default
+  - optimizer: adamw
+
+batch_size: 32
+device: 'cuda'
+experiment_name: ${now:%Y-%m-%d_%H-%M-%S}
+lambda_gt: 1.0
+lambda_idx: 1.0
+lambda_pixel: 10.0
+lambda_w: 10.0
+log_interval: 100
+learning_rate: 1e-4
+num_blocks: 3
+num_strokes: 8
+param_shape: 4
+patch_size: 64
+save_interval: 50000
+seed: 0
+shapes_path: "/mnt/home/jsutor/ceph/painting-with-shapes/keep_emojis"
+total_iters: 1000000
+
+hydra:
+  run:
+    dir: /mnt/home/jsutor/ceph/${hydra.job.name}/${experiment_name}
+  sweep:
+    dir: ./multirun
+    subdir: ${experiment_name}
