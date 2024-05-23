@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 
+from cog import BasePredictor, Input, Path
 from omegaconf import OmegaConf
 
-from cog import BasePredictor, Input, Path
 from inference import inference
 from model import Network
 

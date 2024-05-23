@@ -4,4 +4,8 @@ build:
     - pillow==10.2.0
     - torch==2.2.1
     - torchvision==0.17.1
-predict: "cog.py:Predictor"
+    - omegaconf==2.3.0
+    - tqdm==4.66.4
+    - hydra-core==1.3.2
+    - scipy==1.13.0
+predict: "predict.py:Predictor"
