@@ -18,30 +18,14 @@ from model import Network
 from utils import crop, pad, param2img_parallel, read_img
 
 
-def inference(cfg: Union[OmegaConf, DictConfig, ListConfig], model: nn.Module):
+def inference(
+    cfg: Union[OmegaConf, DictConfig, ListConfig],
+    model: nn.Module,
+    shapes: torch.Tensor,
+):
     device = torch.device(cfg.device)
 
     with torch.no_grad():
-        valid_image_extensions = tuple(Image.registered_extensions().keys())
-
-        if cfg.shapes_path.endswith(".pth"):
-            shapes = torch.load(cfg.shapes_path)
-
-        else:
-            paths = sorted(
-                [
-                    os.path.join(cfg.shapes_path, f)
-                    for f in os.listdir(cfg.shapes_path)
-                    if f.endswith(valid_image_extensions)
-                ]
-            )
-            shapes = torch.cat([read_img(path) for path in paths])
-            zeros_image = torch.zeros_like(shapes[-1])
-            shapes = torch.cat([shapes, zeros_image.unsqueeze(0)])
-            shapes = F.interpolate(
-                shapes, (2 * cfg.patch_size, 2 * cfg.patch_size), mode="bilinear"
-            )
-
         num_shapes = shapes.shape[0]
 
         original_image = read_img(cfg.target_path)[:, :3, ...].to(device)
@@ -216,7 +200,27 @@ def cli_inference(cfg: Union[OmegaConf, DictConfig, ListConfig]):
     except:
         model.load_state_dict(torch.load(cfg.weights_path)["model"])
 
-    inference(cfg, model)
+    valid_image_extensions = tuple(Image.registered_extensions().keys())
+
+    if cfg.shapes_path.endswith(".pth"):
+        shapes = torch.load(cfg.shapes_path)
+
+    else:
+        paths = sorted(
+            [
+                os.path.join(cfg.shapes_path, f)
+                for f in os.listdir(cfg.shapes_path)
+                if f.endswith(valid_image_extensions)
+            ]
+        )
+        shapes = torch.cat([read_img(path) for path in paths])
+        zeros_image = torch.zeros_like(shapes[-1])
+        shapes = torch.cat([shapes, zeros_image.unsqueeze(0)])
+        shapes = F.interpolate(
+            shapes, (2 * cfg.patch_size, 2 * cfg.patch_size), mode="bilinear"
+        )
+
+    inference(cfg, model, shapes)
 
 
 if __name__ == "__main__":

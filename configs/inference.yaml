@@ -14,9 +14,9 @@ param_shape: 4
 patch_size: 64
 recreation_path: "./images/recreation.jpg"
 scale: 8
-shapes_path: "./storage/shapes.pth"
+shapes_path: "./shapes.pth"
 target_path: "./images/mona.jpg"
-weights_path: "./storage/weights.pth"
+weights_path: "./weights.pth"
 
 hydra:
   run:
