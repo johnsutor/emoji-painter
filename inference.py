@@ -47,6 +47,7 @@ def inference(
         num_strokes=cfg.num_strokes,
         device=device,
         batch_size=1,
+        train=False,
     )
 
     with torch.no_grad():

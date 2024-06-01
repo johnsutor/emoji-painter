@@ -6,7 +6,7 @@ import torch
 import torch.nn.functional as F
 from scipy.optimize import linear_sum_assignment
 
-from utils import gaussian_w_distance
+from utils import TruncatedNormal, gaussian_w_distance
 
 
 class Environment:
@@ -28,8 +28,9 @@ class Environment:
         num_strokes: int,
         lambda_gt: float = 1.0,
         lambda_idx: float = 1.0,
-        lambda_pixel: float = 10.0,
+        lambda_pixel: float = 1.0,
         lambda_w: float = 10.0,
+        train: bool = True,
     ):
         """
         Args:
@@ -39,6 +40,11 @@ class Environment:
             d (int): Number of parameters per shape
             patch_size (int): Size of the patch
             num_strokes (int): Number of strokes to use
+            lambda_gt (float, optional): Weight for ground truth loss. Defaults to 1.0.
+            lambda_idx (float, optional): Weight for index loss. Defaults to 1.0.
+            lambda_pixel (float, optional): Weight for pixel loss. Defaults to 1.0.
+            lambda_w (float, optional): Weight for wasserstein loss. Defaults to 10.0.
+            train (bool, optional): Whether to train the model. Defaults to True.
         """
         self.device = device
         self.batch_size = batch_size
@@ -51,8 +57,19 @@ class Environment:
         self.lambda_idx = lambda_idx
         self.lambda_pixel = lambda_pixel
         self.lambda_w = lambda_w
+        if train:
+            import lpips
+            self.perceptual_loss = lpips.LPIPS(net="vgg")
+            self.perceptual_loss.to(self.device)
 
-    def param2stroke(self, param: torch.Tensor, idx: torch.Tensor, H: int, W: int):
+    def param2stroke(
+        self,
+        param: torch.Tensor,
+        idx: torch.Tensor,
+        H: int,
+        W: int,
+        sample_theta: bool = False,
+    ):
         """Convert parameters to a stroke using grid sampling
 
         Args:
@@ -66,6 +83,14 @@ class Environment:
         """
         b = max(param.shape[0], 1)
         x0, y0, w, theta = param.split(1, dim=1)
+
+        # For simplicity, we scale theta to be in the range [-1, 1] here
+        # so that we can still sample using standard uniform.
+        theta = theta * 2 - 1
+
+        # Promotes diversity in the generated images
+        if sample_theta:
+            theta = TruncatedNormal(theta, 0.5, -1, 1).sample()
 
         # If idx is integers, simply get the idx. Otherwise,
         # Call the gumbel softmax (treating idx like logits)
@@ -237,7 +262,14 @@ class Environment:
         Returns:
             torch.Tensor: Loss of the current prediction
         """
-        self.loss_pixel = F.l1_loss(self.rec, self.render) * self.lambda_pixel
+        # For L1 loss, use self.loss_pixel = F.l1_loss(self.rec, self.render) * self.lambda_pixel
+        # Have to rescale rec and render to be in range [-1, 1]
+
+        self.rec = (self.rec * 2) - 1
+        self.render = (self.render * 2) - 1
+        self.loss_pixel = (
+            self.perceptual_loss(self.rec, self.render).mean() * self.lambda_pixel
+        )
         cur_valid_gt_size = 0
         with torch.no_grad():
             r_idx = []

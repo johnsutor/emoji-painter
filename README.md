@@ -16,8 +16,8 @@ Please visit [here](https://replicate.com/johnsutor/emoji-painter) for the demo 
 Outputs don't always look very similar to the target image. Also, the emojis are often placed at 45 degree angles. I'll work on some fine-tuning in the near future to make sure there's a fair amout of variety (perhaps with sampling) in the angle the emojis are placed at. 
 
 ## 🛣️ Roadmap
-- [ ] Add sampling to the angle to promote variability in rotation 
+- [x] Add sampling to the angle to promote variability in rotation 
+- [x] Try a neural loss for pixel-wise loss 
 - [ ] Train to generate using other versions of shapes 
 - [ ] Document training procedure
-- [ ] Try a neural loss for pixel-wise loss 
 - [ ] Try using a spectral loss
